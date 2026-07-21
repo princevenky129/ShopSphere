@@ -19,7 +19,24 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+// Allow requests only from your deployed frontend and local dev
+const allowedOrigins = [
+  'https://shopsphere-ecommerce-store.vercel.app',
+  'http://localhost:5173',
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like Postman/Thunder Client, or server-to-server)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
 
 app.get('/', (req, res) => {
