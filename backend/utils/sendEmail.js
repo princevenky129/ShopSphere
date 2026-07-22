@@ -2,12 +2,21 @@ const nodemailer = require('nodemailer');
 
 // A "transporter" is nodemailer's term for the connection to the email
 // server that will actually send the message — in our case, Gmail's servers.
+//
+// We use explicit host/port instead of the "service: gmail" shortcut, and
+// add "family: 4" to force Node to connect over IPv4 only. This fixes a
+// common issue on cloud hosts like Render, which don't support outbound
+// IPv6 — without this, Node sometimes picks Gmail's IPv6 address first
+// and the connection fails with ENETUNREACH.
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // true for port 465, false for port 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  family: 4, // force IPv4 — fixes ENETUNREACH on hosts like Render
 });
 
 // Reusable function: pass in who to send to, subject line, and HTML content.
